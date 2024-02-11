@@ -12,6 +12,20 @@
     -webkit-text-size-adjust: 100%;
 }
 
+input {
+    padding: 8px;
+    font-size: 16px;
+    font-family: monospace;
+    border: 1px solid #eee;
+    color: #999;
+    width: 400px;
+    border-radius: 4px;
+}
+
+input:focus {
+    outline: none;
+}
+
 textarea {
     padding: 8px;
     font-size: 16px;
