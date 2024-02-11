@@ -8,16 +8,15 @@
         <script type="module" src="/main.js" defer></script>
     </head>
 
-    <body>
-        <div class="container">
-            <h1>Quick Capture</h1>
-
-            <form class="row" id="greet-form">
-                <input id="greet-input" placeholder="Enter a name..." />
-                <button type="submit">Greet</button>
-            </form>
-
-            <p id="greet-msg"></p>
-        </div>
+    <body class="p-8">
+        <form class="row" id="greet-form">
+            <textarea
+                id="thought-input"
+                placeholder="Enter your thoughts..."
+                autofocus
+            ></textarea>
+            <button id="save-thought">Append to daily note</button>
+            <p id="save-msg"></p>
+        </form>
     </body>
 </html>
