@@ -14,11 +14,16 @@ fn main() {
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn save_thought(thought: String) -> Result<String, String> {
+fn save_thought(thought: String, path: String) -> Result<String, String> {
+    // Check if the path is empty
+    if path.is_empty() {
+        return Err("Error: Path cannot be empty".to_string());
+    }
+
     let now = Local::now();
     let date = now.format("%Y-%m-%d").to_string();
     let timestamp = now.format("%y%m%d%H%M").to_string();
-    let file_name = format!("/Users/martinbetz/Notes/Daily/{}.md", date);
+    let file_name = format!("{}/{}.md", path, date);
     let path = PathBuf::from(file_name);
 
     if let Some(parent) = path.parent() {
