@@ -23,6 +23,19 @@ saveThoughtBtn.addEventListener("click", async () => {
   window.localStorage.setItem("path", path);
 });
 
+
+thoughtInputEl.addEventListener('keydown', handleKeyDown);
+
+function handleKeyDown(event) {
+  // Check if the user hit Cmd+Enter (or Ctrl+Enter on Windows)
+  if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+    event.preventDefault(); // Prevent the default action (inserting a new line)
+    // Now call the existing saveThoughtBtn click handler
+    saveThoughtBtn.click();
+  }
+}
+
+
 window.addEventListener("DOMContentLoaded", () => {
   // Load the path from local storage
   const path = window.localStorage.getItem("path");

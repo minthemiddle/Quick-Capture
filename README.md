@@ -14,6 +14,7 @@ Every thought is added in the following format: *Bolded Timestamp > Text > Newli
 Copy binary to applications and double-click.
 Set path to where your daily notes live.
 Write your thought and submit via button click.
+You can also submit via `cmd+enter` (Mac)/`ctrl+enter` (Windows)
 Speed up app launching with with an app like Alfred or Raycast and hotkeys.
 
 **Screenshot**
