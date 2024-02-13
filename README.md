@@ -20,6 +20,11 @@ Speed up app launching with with an app like Alfred or Raycast and hotkeys.
 **Screenshot**
 ![Quick capture to daily note](screenshot.png)
 
+**Icon**
+The app has an icon as well
+
+![App icon quick capture](src-tauri/icons/128x128.png)
+
 **Caveats**
 - Only tested on MacOS 12.7 (might work on other Macs)
 - Does not follow any design guidelines yet
