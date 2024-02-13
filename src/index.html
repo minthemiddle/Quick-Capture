@@ -1,23 +1,29 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="styles.css" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Tauri App</title>
-        <script type="module" src="/main.js" defer></script>
-    </head>
 
-    <body class="p-8">
-        <form class="row" id="greet-form">
-            <textarea
-                id="thought-input"
-                placeholder="Enter your thoughts..."
-                autofocus
-            ></textarea>
-            <button id="save-thought">Append to daily note</button>
-            <input id="path-input" placeholder="Enter the path..." required />
-            <p id="save-msg"></p>
-        </form>
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="out.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quick Capture</title>
+    <script type="module" src="/main.js" defer></script>
+</head>
+
+<body class="">
+    <div class="h-screen flex flex-col" id="greet-form">
+        <div class="flex-grow h-96">
+            <textarea class="w-full h-full pt-4 pl-4 focus:outline-none resize-none" id="thought-input"
+                placeholder="Enter your thought..." autofocus></textarea>
+
+        </div>
+        <div class="flex-grow-0 flex mb-1">
+            <button class="ml-2 px-2 underline text-blue-500" id="save-thought">Append & clear</button>
+            <label class="flex flex-1 w-full ml-4 items-center">Path:
+                <input class="w-full p-2 flex-1 focus:outline-none items-center" id="path-input"
+                    placeholder="Enter the path..." required />
+            </label>
+        </div>
+    </div>
+</body>
+
 </html>
