@@ -26,5 +26,4 @@ The app has an icon as well
 ![App icon quick capture](src-tauri/icons/128x128.png)
 
 **Caveats**
-- Only tested on MacOS 12.7 (x64) and 14.3 (Silicon)
-- Does not follow any design guidelines yet
+Only tested on MacOS 12.7 (x64) and 14.3 (Silicon)
