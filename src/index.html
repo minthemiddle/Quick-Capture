@@ -1,32 +1,60 @@
 <!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="out.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Quick Capture</title>
+        <script type="module" src="/main.js" defer></script>
+    </head>
 
-<head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="out.css" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quick Capture</title>
-    <script type="module" src="/main.js" defer></script>
-</head>
-
-<body class="">
-    <div class="h-screen flex flex-col" id="greet-form">
-        <div class="flex-grow h-96">
-            <textarea class="w-full h-full pt-4 pl-4 focus:outline-none resize-none" id="thought-input"
-                placeholder="Enter your thought..." autofocus></textarea>
-
+    <body class="">
+        <div class="flex h-screen flex-col" id="greet-form">
+            <div class="h-96 flex-grow">
+                <textarea
+                    class="h-full w-full resize-none pl-4 pt-4 focus:outline-none"
+                    id="thought-input"
+                    placeholder="Enter your thought..."
+                    autofocus
+                ></textarea>
+            </div>
+            <div class="mb-1 flex flex-grow-0 items-center">
+                <button
+                    class="ml-2 px-2 text-blue-500 underline"
+                    id="save-thought"
+                >
+                    Append & clear
+                </button>
+                <p
+                    id="status-paragraph"
+                    class="ml-2 flex w-32 flex-grow-0 items-center"
+                    title=""
+                >
+                    Status:
+                    <span id="status-icon" class="text-slate-200">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            stroke="none"
+                            class="inline"
+                        >
+                            <circle cx="12.1" cy="12.1" r="5" />
+                        </svg> </span
+                    ><span class="ml-1" id="status">Edit</span>
+                </p>
+                <label class="ml-4 flex w-full flex-1 items-center"
+                    >Path:
+                    <input
+                        class="w-full flex-1 items-center p-2 focus:outline-none"
+                        id="path-input"
+                        placeholder="Enter the path..."
+                        required
+                    />
+                </label>
+            </div>
         </div>
-        <div class="flex-grow-0 flex mb-1 items-center">
-            <button class="ml-2 px-2 underline text-blue-500" id="save-thought">Append & clear</button>
-            <p id="status-paragraph" class="ml-2 flex-grow-0 w-32" title="">Status: <span id="status-icon"
-                    class="text-slate-200">⏺</span><span class="ml-1" id="status">Edit</span>
-            </p>
-            <label class="flex flex-1 w-full ml-4 items-center">Path:
-                <input class="w-full p-2 flex-1 focus:outline-none items-center" id="path-input"
-                    placeholder="Enter the path..." required />
-            </label>
-        </div>
-    </div>
-</body>
-
+    </body>
 </html>
