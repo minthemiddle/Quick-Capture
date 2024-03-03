@@ -6,6 +6,7 @@ You set the path to your daily notes via an input field.
 
 This will append the given thought to a daily note.  
 If no daily note is present, it will also create the note first.
+If intermediate folders don't exist, it will create the folders.
 
 It only works with daily notes in the `YYYY-MM-DD.md` format for now.  
 Every thought is added in the following format: _Bolded Timestamp > Text > Newline_
