@@ -36,7 +36,7 @@ fn save_thought(thought: String, path: String) -> Result<String, String> {
         .open(path)
         .expect("Failed to open file");
 
-    if let Err(e) = writeln!(file, "\n**{}**\n{}\n", timestamp, thought) {
+    if let Err(e) = writeln!(file, "\n## {}\n{}\n", timestamp, thought) {
         return Err(format!("Failed to write to file: {}", e));
     }
 
