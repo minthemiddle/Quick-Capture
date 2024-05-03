@@ -29,4 +29,10 @@ The app has an icon as well
 ![App icon quick capture](src-tauri/icons/128x128.png)
 
 **Caveats**
-Only tested on MacOS 12.7 (x64) and 14.3 (Silicon)
+Only tested on MacOS 12.7 (x64) and 14.3 (Silicon)  
+Works only with absolute paths, `~` not supported  
+Will not get flexible ([#18](https://github.com/minthemiddle/Quick-Capture/issues/18))  
+Will not get a WYSIWYG editor ([#18](https://github.com/minthemiddle/Quick-Capture/issues/18))  
+Will not get tag autocompletion ([#19](https://github.com/minthemiddle/Quick-Capture/issues/19))  
+Will not get a "save draft" option ([#5](https://github.com/minthemiddle/Quick-Capture/issues/5))
+Will not get a flexible save format (anytime soon) ([#17](https://github.com/minthemiddle/Quick-Capture/issues/17)
