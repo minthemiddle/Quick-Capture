@@ -1,7 +1,7 @@
 # Quick Capture to Daily Note
 
 A quick capture app (written in Tauri) to add thoughts to your daily note.  
-It has a plain HTML multiline textarea where you can add your thought.  
+It has a plain multiline textarea where you can add your thought.  
 You set the path to your daily notes via an input field.
 
 This will append the given thought to a daily note.  
