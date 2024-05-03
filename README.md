@@ -36,3 +36,10 @@ Will not get a WYSIWYG editor ([#18](https://github.com/minthemiddle/Quick-Captu
 Will not get tag autocompletion ([#19](https://github.com/minthemiddle/Quick-Capture/issues/19))  
 Will not get a "save draft" option ([#5](https://github.com/minthemiddle/Quick-Capture/issues/5))
 Will not get a flexible save format (anytime soon) ([#17](https://github.com/minthemiddle/Quick-Capture/issues/17)
+
+**Build**
+To build the app yourself, make sure that _rust_ and _npm_ are installed.  
+`cargo install tauri-cli`  
+`cd src-tauri`  
+`cargo tauri build`  
+Find the builds in the `/target` folder.
