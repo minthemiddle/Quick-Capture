@@ -25,6 +25,20 @@ const statusUpdates = {
   }
 };
 
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+const saveDraftDebounced = debounce(saveDraft, 500);
+
 saveThoughtBtn.addEventListener("click", async () => {
   const thought = thoughtInputEl.value;
   const path = pathInputEl.value;
@@ -53,13 +67,17 @@ function updateStatus(statusKey) {
   statusIconEl.className = iconClass;
 
   // Revert to default status after a delay
-  setTimeout(() => {
-    const defaultStatus = statusUpdates['edit'];
-    statusEl.textContent = defaultStatus.message;
-    statusIconEl.className = defaultStatus.iconClass;
-  }, statusKey === 'edit' ? 0 : 3000); // Immediate revert for 'edit', delay for others
+  if (statusKey !== 'edit') {
+    setTimeout(() => {
+      const defaultStatus = statusUpdates['edit'];
+      statusEl.textContent = defaultStatus.message;
+      statusIconEl.className = defaultStatus.iconClass;
+    }, 3000);
+  }
 }
 
+
+thoughtInputEl.addEventListener('input', saveDraftDebounced);
 
 thoughtInputEl.addEventListener('keydown', handleKeyDown);
 
@@ -79,4 +97,16 @@ window.addEventListener("DOMContentLoaded", () => {
   if (path) {
     pathInputEl.value = path;
   }
+
+  // Load the draft thought from local storage
+  const draftThought = window.localStorage.getItem("draftThought");
+  if (draftThought) {
+    thoughtInputEl.value = draftThought;
+  }
+  
+  updateStatus("edit");
 });
+function saveDraft() {
+  const thought = thoughtInputEl.value;
+  window.localStorage.setItem("draftThought", thought);
+}

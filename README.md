@@ -18,6 +18,8 @@ Copy binary to applications and double-click.
 Set path to where your daily notes live.  
 Write your thought and submit via button click.  
 You can also submit via `cmd+enter` (Mac)/`ctrl+enter` (Windows)  
+Your input is automatically saved as a draft while you type (updates on pause).  
+Drafts are restored when you reopen the app.  
 Speed up app launching with with an app like Alfred or Raycast and hotkeys.
 
 **Screenshot**  
@@ -34,7 +36,6 @@ Works only with absolute paths, `~` not supported
 Will not get flexible ([#18](https://github.com/minthemiddle/Quick-Capture/issues/18))  
 Will not get a WYSIWYG editor ([#18](https://github.com/minthemiddle/Quick-Capture/issues/18))  
 Will not get tag autocompletion ([#19](https://github.com/minthemiddle/Quick-Capture/issues/19))  
-Will not get a "save draft" option ([#5](https://github.com/minthemiddle/Quick-Capture/issues/5))
 Will not get a flexible save format (anytime soon) ([#17](https://github.com/minthemiddle/Quick-Capture/issues/17))
 
 **Build**  
