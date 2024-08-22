@@ -54,6 +54,7 @@ saveThoughtBtn.addEventListener("click", async () => {
     console.log(response);
     thoughtInputEl.value = ""; // Clear the textarea after saving
     window.localStorage.setItem("path", path); // Save the path to local storage
+    window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
     updateStatus("success");
   } catch (error) {
     console.error(error);
@@ -108,5 +109,9 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 function saveDraft() {
   const thought = thoughtInputEl.value;
-  window.localStorage.setItem("draftThought", thought);
+  if (thought.trim() === "") {
+    window.localStorage.removeItem("draftThought");
+  } else {
+    window.localStorage.setItem("draftThought", thought);
+  }
 }
