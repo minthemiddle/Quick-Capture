@@ -22,6 +22,20 @@ Your input is automatically saved as a draft while you type (updates on pause).
 Drafts are restored when you reopen the app.  
 Speed up app launching with with an app like Alfred or Raycast and hotkeys.
 
+**Formatting Shortcuts**  
+The app supports the following formatting shortcuts:
+- Bold: `cmd+b` (Mac) / `ctrl+b` (Windows)
+- Italic: `cmd+i` (Mac) / `ctrl+i` (Windows)
+- Link: `cmd+k` (Mac) / `ctrl+k` (Windows)
+
+Note: These shortcuts add formatting to the selected text or at the cursor position.
+They do not toggle formatting; applying a shortcut multiple times adds multiple formatting marks.
+
+Examples:
+- Selecting text and using the bold shortcut will wrap it with `**`: `**selected text**`
+- Using the italic shortcut will add `*` around the selection or at the cursor: `*text*`
+- The link shortcut will create a Markdown link structure: `[selected text]()` or `[]()` if no text is selected
+
 **Screenshot**  
 ![Quick capture to daily note](screenshot.png)
 
