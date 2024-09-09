@@ -34,7 +34,8 @@ They do not toggle formatting; applying a shortcut multiple times adds multiple 
 Examples:
 - Selecting text and using the bold shortcut will wrap it with `**`: `**selected text**`
 - Using the italic shortcut will add `*` around the selection or at the cursor: `*text*`
-- The link shortcut will create a Markdown link structure: `[selected text]()` or `[]()` if no text is selected
+- The link shortcut will create a Markdown link structure: `[selected text](|)` or `[](|)` if no text is selected.  
+- The `|` indicates where the cursor will be placed after hitting the shortcut
 
 **Screenshot**  
 ![Quick capture to daily note](screenshot.png)
