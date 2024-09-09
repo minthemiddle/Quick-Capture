@@ -81,6 +81,7 @@ function updateStatus(statusKey) {
 thoughtInputEl.addEventListener('input', saveDraftDebounced);
 
 thoughtInputEl.addEventListener('keydown', handleKeyDown);
+thoughtInputEl.addEventListener('keydown', handleBoldShortcut);
 
 function handleKeyDown(event) {
   // Check if the user hit Cmd+Enter (or Ctrl+Enter on Windows)
@@ -88,6 +89,27 @@ function handleKeyDown(event) {
     event.preventDefault(); // Prevent the default action (inserting a new line)
     // Now call the existing saveThoughtBtn click handler
     saveThoughtBtn.click();
+  }
+}
+
+function handleBoldShortcut(event) {
+  if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
+    event.preventDefault(); // Prevent the default action
+    const start = thoughtInputEl.selectionStart;
+    const end = thoughtInputEl.selectionEnd;
+    const selectedText = thoughtInputEl.value.substring(start, end);
+
+    if (selectedText) {
+      // Wrap the selected text with **
+      thoughtInputEl.value = thoughtInputEl.value.substring(0, start) + '**' + selectedText + '**' + thoughtInputEl.value.substring(end);
+      thoughtInputEl.selectionStart = start + 2;
+      thoughtInputEl.selectionEnd = end + 2;
+    } else {
+      // Insert ** and place the cursor between them
+      thoughtInputEl.value = thoughtInputEl.value.substring(0, start) + '**' + '**' + thoughtInputEl.value.substring(end);
+      thoughtInputEl.selectionStart = start + 2;
+      thoughtInputEl.selectionEnd = start + 2;
+    }
   }
 }
 
