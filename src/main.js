@@ -111,24 +111,24 @@ function wrapSelectedText(textarea, prefix, suffix) {
 }
 
 function handleBoldShortcut(event) {
-  // Check if the user hit Cmd+B (or Ctrl+B on Windows)
-  if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
+  // Check if the user hit Cmd+B (or Ctrl+B on Windows), but not Shift+Cmd+B
+  if ((event.metaKey || event.ctrlKey) && event.key === 'b' && !event.shiftKey) {
     event.preventDefault(); // Prevent the default action
     wrapSelectedText(thoughtInputEl, '**', '**'); // Wrap the selected text with **
   }
 }
 
 function handleItalicShortcut(event) {
-  // Check if the user hit Cmd+I (or Ctrl+I on Windows)
-  if ((event.metaKey || event.ctrlKey) && event.key === 'i') {
+  // Check if the user hit Cmd+I (or Ctrl+I on Windows), but not Shift+Cmd+I
+  if ((event.metaKey || event.ctrlKey) && event.key === 'i' && !event.shiftKey) {
     event.preventDefault(); // Prevent the default action
     wrapSelectedText(thoughtInputEl, '*', '*'); // Wrap the selected text with *
   }
 }
 
 function handleLinkShortcut(event) {
-  // Check if the user hit Cmd+K (or Ctrl+K on Windows)
-  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+  // Check if the user hit Cmd+K (or Ctrl+K on Windows), but not Shift+Cmd+K
+  if ((event.metaKey || event.ctrlKey) && event.key === 'k' && !event.shiftKey) {
     event.preventDefault(); // Prevent the default action
     const start = thoughtInputEl.selectionStart;
     const end = thoughtInputEl.selectionEnd;
