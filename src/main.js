@@ -92,24 +92,27 @@ function handleKeyDown(event) {
   }
 }
 
+function wrapSelectedText(textarea, prefix, suffix) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const selectedText = textarea.value.substring(start, end);
+
+  if (selectedText) {
+    textarea.value = textarea.value.substring(0, start) + prefix + selectedText + suffix + textarea.value.substring(end);
+    textarea.selectionStart = start + prefix.length;
+    textarea.selectionEnd = end + prefix.length;
+  } else {
+    textarea.value = textarea.value.substring(0, start) + prefix + suffix + textarea.value.substring(end);
+    textarea.selectionStart = start + prefix.length;
+    textarea.selectionEnd = start + prefix.length;
+  }
+}
+
 function handleBoldShortcut(event) {
+  // Check if the user hit Cmd+B (or Ctrl+B on Windows)
   if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
     event.preventDefault(); // Prevent the default action
-    const start = thoughtInputEl.selectionStart;
-    const end = thoughtInputEl.selectionEnd;
-    const selectedText = thoughtInputEl.value.substring(start, end);
-
-    if (selectedText) {
-      // Wrap the selected text with **
-      thoughtInputEl.value = thoughtInputEl.value.substring(0, start) + '**' + selectedText + '**' + thoughtInputEl.value.substring(end);
-      thoughtInputEl.selectionStart = start + 2;
-      thoughtInputEl.selectionEnd = end + 2;
-    } else {
-      // Insert ** and place the cursor between them
-      thoughtInputEl.value = thoughtInputEl.value.substring(0, start) + '**' + '**' + thoughtInputEl.value.substring(end);
-      thoughtInputEl.selectionStart = start + 2;
-      thoughtInputEl.selectionEnd = start + 2;
-    }
+    wrapSelectedText(thoughtInputEl, '**', '**'); // Wrap the selected text with **
   }
 }
 
