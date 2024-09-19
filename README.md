@@ -28,6 +28,8 @@ The app supports the following formatting shortcuts:
 - Italic: `cmd+i` (Mac) / `ctrl+i` (Windows)
 - Link: `cmd+k` (Mac) / `ctrl+k` (Windows)
 - Todo: `cmd+l` (Mac) / `ctrl+l` (Windows)
+- Increase Font Size: `cmd++` (Mac) / `ctrl++` (Windows)
+- Decrease Font Size: `cmd+-` (Mac) / `ctrl+-` (Windows)
 
 Note: These shortcuts add formatting to the selected text or at the cursor position.
 They do not toggle formatting; applying a shortcut multiple times adds multiple formatting marks.
