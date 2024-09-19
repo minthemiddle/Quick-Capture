@@ -198,6 +198,7 @@ function handleFontSizeIncrease(event) {
       const newIndex = currentIndex + 1;
       thoughtInputEl.classList.remove(fontSizes[currentIndex]);
       thoughtInputEl.classList.add(fontSizes[newIndex]);
+      saveFontSize(fontSizes[newIndex]);
     }
   }
 }
@@ -210,6 +211,7 @@ function handleFontSizeDecrease(event) {
       const newIndex = currentIndex - 1;
       thoughtInputEl.classList.remove(fontSizes[currentIndex]);
       thoughtInputEl.classList.add(fontSizes[newIndex]);
+      saveFontSize(fontSizes[newIndex]);
     }
   }
 }
@@ -228,6 +230,12 @@ window.addEventListener("DOMContentLoaded", () => {
     thoughtInputEl.value = draftThought;
   }
 
+  // Load the saved font size from local storage
+  const savedFontSize = window.localStorage.getItem("fontSize");
+  if (savedFontSize) {
+    thoughtInputEl.className = thoughtInputEl.className.replace(/text-\w+/, savedFontSize);
+  }
+
   updateStatus("edit");
 });
 function saveDraft() {
@@ -237,4 +245,7 @@ function saveDraft() {
   } else {
     window.localStorage.setItem("draftThought", thought);
   }
+}
+function saveFontSize(fontSize) {
+  window.localStorage.setItem("fontSize", fontSize);
 }
