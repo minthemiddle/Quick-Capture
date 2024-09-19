@@ -85,6 +85,13 @@ thoughtInputEl.addEventListener('keydown', handleBoldShortcut);
 thoughtInputEl.addEventListener('keydown', handleItalicShortcut);
 thoughtInputEl.addEventListener('keydown', handleLinkShortcut);
 thoughtInputEl.addEventListener('keydown', handleTodoShortcut);
+thoughtInputEl.addEventListener('keydown', handleFontSizeIncrease);
+thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
+
+// Ensure a default font size class is set
+if (!thoughtInputEl.className.match(/text-\w+/)) {
+  thoughtInputEl.className += ' text-base';
+}
 
 function handleKeyDown(event) {
   // Check if the user hit Cmd+Enter (or Ctrl+Enter on Windows)
@@ -167,6 +174,42 @@ function handleTodoShortcut(event) {
       thoughtInputEl.value = thoughtInputEl.value.substring(0, start) + '- [ ] ' + thoughtInputEl.value.substring(end);
       thoughtInputEl.selectionStart = start + 6;
       thoughtInputEl.selectionEnd = start + 6;
+    }
+  }
+}
+
+const fontSizes = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl'];
+
+function getCurrentFontSizeIndex() {
+  const currentClass = thoughtInputEl.className;
+  for (let i = 0; i < fontSizes.length; i++) {
+    if (currentClass.includes(fontSizes[i])) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function handleFontSizeIncrease(event) {
+  if ((event.metaKey || event.ctrlKey) && event.key === '+') {
+    event.preventDefault(); // Prevent the default action
+    const currentIndex = getCurrentFontSizeIndex();
+    if (currentIndex < fontSizes.length - 1) {
+      const newIndex = currentIndex + 1;
+      thoughtInputEl.classList.remove(fontSizes[currentIndex]);
+      thoughtInputEl.classList.add(fontSizes[newIndex]);
+    }
+  }
+}
+
+function handleFontSizeDecrease(event) {
+  if ((event.metaKey || event.ctrlKey) && event.key === '-') {
+    event.preventDefault(); // Prevent the default action
+    const currentIndex = getCurrentFontSizeIndex();
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      thoughtInputEl.classList.remove(fontSizes[currentIndex]);
+      thoughtInputEl.classList.add(fontSizes[newIndex]);
     }
   }
 }
