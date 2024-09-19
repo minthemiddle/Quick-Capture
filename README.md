@@ -27,6 +27,7 @@ The app supports the following formatting shortcuts:
 - Bold: `cmd+b` (Mac) / `ctrl+b` (Windows)
 - Italic: `cmd+i` (Mac) / `ctrl+i` (Windows)
 - Link: `cmd+k` (Mac) / `ctrl+k` (Windows)
+- Todo: `cmd+l` (Mac) / `ctrl+l` (Windows)
 
 Note: These shortcuts add formatting to the selected text or at the cursor position.
 They do not toggle formatting; applying a shortcut multiple times adds multiple formatting marks.
