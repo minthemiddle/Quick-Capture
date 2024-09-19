@@ -19,12 +19,17 @@
                 ></textarea>
             </div>
             <div class="mb-1 flex flex-grow-0 items-center">
-                <button
-                    class="ml-2 px-2 text-blue-500 underline"
-                    id="save-thought"
-                >
-                    Append & clear
-                </button>
+                <div class="relative">
+                  <select id="save-mode" class="ml-1 form-select appearance-none bg-transparent border border-gray-300 text-gray-700 py-1 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                      <option value="daily">Append to Daily Note</option>
+                      <option value="standalone">Save as Standalone Note</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    </svg>
+                  </div>
+                </div>
                 <p
                     id="status-paragraph"
                     class="ml-2 flex w-32 flex-grow-0 items-center"
