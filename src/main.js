@@ -2,7 +2,8 @@ const { invoke } = window.__TAURI__.tauri;
 
 const saveThoughtBtn = document.querySelector("#save-thought");
 const thoughtInputEl = document.querySelector("#thought-input");
-const pathInputEl = document.querySelector("#path-input");
+const dailyPathInputEl = document.querySelector("#daily-path-input");
+const standalonePathInputEl = document.querySelector("#standalone-path-input");
 const statusEl = document.querySelector("#status");
 const statusIconEl = document.querySelector("#status-icon");
 
@@ -39,28 +40,6 @@ function debounce(func, wait) {
 
 const saveDraftDebounced = debounce(saveDraft, 500);
 
-saveThoughtBtn.addEventListener("click", async () => {
-  const thought = thoughtInputEl.value;
-  const path = pathInputEl.value;
-
-  // Check if the path is empty
-  if (!path) {
-    updateStatus("no_path");
-    return;
-  }
-
-  try {
-    const response = await invoke("save_thought", { thought, path });
-    console.log(response);
-    thoughtInputEl.value = ""; // Clear the textarea after saving
-    window.localStorage.setItem("path", path); // Save the path to local storage
-    window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
-    updateStatus("success");
-  } catch (error) {
-    console.error(error);
-    updateStatus("error"); // Update status to "Failed" on error
-  }
-});
 
 function updateStatus(statusKey) {
   const { message, iconClass } = statusUpdates[statusKey];
@@ -79,7 +58,6 @@ function updateStatus(statusKey) {
 
 
 thoughtInputEl.addEventListener('input', saveDraftDebounced);
-
 thoughtInputEl.addEventListener('keydown', handleKeyDown);
 thoughtInputEl.addEventListener('keydown', handleBoldShortcut);
 thoughtInputEl.addEventListener('keydown', handleItalicShortcut);
@@ -87,18 +65,66 @@ thoughtInputEl.addEventListener('keydown', handleLinkShortcut);
 thoughtInputEl.addEventListener('keydown', handleTodoShortcut);
 thoughtInputEl.addEventListener('keydown', handleFontSizeIncrease);
 thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
+thoughtInputEl.addEventListener('keydown', handleToggleModeShortcut);
+
 
 // Ensure a default font size class is set
 if (!thoughtInputEl.className.match(/text-\w+/)) {
   thoughtInputEl.className += ' text-base';
 }
 
-function handleKeyDown(event) {
+async function handleKeyDown(event) {
   // Check if the user hit Cmd+Enter (or Ctrl+Enter on Windows)
   if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
     event.preventDefault(); // Prevent the default action (inserting a new line)
-    // Now call the existing saveThoughtBtn click handler
-    saveThoughtBtn.click();
+    const thought = thoughtInputEl.value;
+    const mode = document.querySelector("#save-mode").value;
+    const path = mode === "daily" ? dailyPathInputEl.value : standalonePathInputEl.value;
+
+    // Check if the path is empty
+    if (!path) {
+      updateStatus("no_path");
+      return;
+    }
+
+    try {
+      const response = await invoke("save_thought", { thought, path, mode });
+      console.log(response);
+      thoughtInputEl.value = ""; // Clear the textarea after saving
+      window.localStorage.setItem("dailyPath", dailyPathInputEl.value); // Save the daily path to local storage
+      window.localStorage.setItem("standalonePath", standalonePathInputEl.value); // Save the standalone path to local storage
+      window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
+      updateStatus("success");
+    } catch (error) {
+      console.error(error);
+      updateStatus("error"); // Update status to "Failed" on error
+    }
+  }
+}
+
+function togglePathInputs() {
+  const mode = document.getElementById("save-mode").value;
+  const dailyPathLabel = document.getElementById("daily-path-label");
+  const standalonePathLabel = document.getElementById("standalone-path-label");
+
+  if (mode === "daily") {
+    dailyPathLabel.classList.remove("hidden");
+    standalonePathLabel.classList.add("hidden");
+  } else if (mode === "standalone") {
+    dailyPathLabel.classList.add("hidden");
+    standalonePathLabel.classList.remove("hidden");
+  }
+}
+
+function handleToggleModeShortcut(event) {
+  // Check if the user hit Cmd+M (or Ctrl+M on Windows)
+  if ((event.metaKey || event.ctrlKey) && event.key === ',') {
+    event.preventDefault(); // Prevent the default action
+    const saveModeEl = document.querySelector("#save-mode");
+    const currentMode = saveModeEl.value;
+    const newMode = currentMode === "daily" ? "standalone" : "daily";
+    saveModeEl.value = newMode;
+    togglePathInputs(); // Toggle the path input fields based on the new mode
   }
 }
 
@@ -218,10 +244,16 @@ function handleFontSizeDecrease(event) {
 
 
 window.addEventListener("DOMContentLoaded", () => {
-  // Load the path from local storage
-  const path = window.localStorage.getItem("path");
-  if (path) {
-    pathInputEl.value = path;
+  // Load the daily path from local storage
+  const dailyPath = window.localStorage.getItem("dailyPath");
+  if (dailyPath) {
+    dailyPathInputEl.value = dailyPath;
+  }
+
+  // Load the standalone path from local storage
+  const standalonePath = window.localStorage.getItem("standalonePath");
+  if (standalonePath) {
+    standalonePathInputEl.value = standalonePath;
   }
 
   // Load the draft thought from local storage
@@ -237,6 +269,12 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   updateStatus("edit");
+
+  // Initialize the path inputs visibility
+  togglePathInputs();
+
+  // Add event listener for save mode change
+  document.querySelector("#save-mode").addEventListener("change", togglePathInputs);
 });
 function saveDraft() {
   const thought = thoughtInputEl.value;
