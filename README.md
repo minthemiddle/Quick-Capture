@@ -62,6 +62,7 @@ Will not get a flexible save format (anytime soon) ([#17](https://github.com/min
 **Build**  
 To build the app yourself, make sure that _rust_ and _npm_ are installed.  
 `cargo install tauri-cli`  
-`cd src-tauri`  
+Go to root.  
+`npx tailwindcss -i ./src/in.css -o ./src/out.css --minify` (to build CSS)  
 `cargo tauri build`  
 Find the builds in the `/target` folder.
