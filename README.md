@@ -46,7 +46,7 @@ Examples:
 
 **Screenshot and Screencast**  
 
-[Screenshot of Quick Capture](screenshot.png)
+[Screenshot of Quick Capture](https://raw.githubusercontent.com/minthemiddle/Quick-Capture/refs/heads/master/screenshot.png)
 
 [screencast.webm](https://github.com/user-attachments/assets/2fa6db13-328f-49fd-b4c5-313f7a5a4270)
 
