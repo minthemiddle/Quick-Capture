@@ -44,7 +44,10 @@ Examples:
 - The link shortcut will create a Markdown link structure: `[selected text](|)` or `[](|)` if no text is selected.  
 - The `|` indicates where the cursor will be placed after hitting the shortcut
 
-**Screencast**  
+**Screenshot and Screencast**  
+
+[Screenshot of Quick Capture](screenshot.png)
+
 [screencast.webm](https://github.com/user-attachments/assets/2fa6db13-328f-49fd-b4c5-313f7a5a4270)
 
 **Icon**
