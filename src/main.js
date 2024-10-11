@@ -1,4 +1,5 @@
 const { invoke } = window.__TAURI__.tauri;
+const { appWindow } = window.__TAURI__.window;
 
 const saveThoughtBtn = document.querySelector("#save-thought");
 const thoughtInputEl = document.querySelector("#thought-input");
@@ -23,6 +24,10 @@ const statusUpdates = {
   no_path: {
     message: "No path",
     iconClass: "text-red-500"
+  },
+  focus: {
+    message: "Toggle focus",
+    iconClass: "text-green-500"
   }
 };
 
@@ -43,15 +48,24 @@ const saveDraftDebounced = debounce(saveDraft, 500);
 
 function updateStatus(statusKey) {
   const { message, iconClass } = statusUpdates[statusKey];
-  statusEl.textContent = message;
-  statusIconEl.className = iconClass;
+  let statusMessage = message;
+  let currentIconClass = iconClass;
 
-  // Revert to default status after a delay
-  if (statusKey !== 'edit') {
+  if (thoughtInputEl.classList.contains("focus-mode")) {
+    statusMessage = "Focus Mode";
+    currentIconClass = "text-blue-500";
+  } else if (statusKey === 'edit') {
+    statusMessage = "Edit";
+    currentIconClass = "text-slate-200";
+  }
+
+  statusEl.textContent = statusMessage;
+  statusIconEl.className = currentIconClass;
+
+  // Revert to default status after a delay only for non-edit and non-focus mode statuses
+  if (statusKey !== 'edit' && !thoughtInputEl.classList.contains("focus-mode")) {
     setTimeout(() => {
-      const defaultStatus = statusUpdates['edit'];
-      statusEl.textContent = defaultStatus.message;
-      statusIconEl.className = defaultStatus.iconClass;
+      updateStatus('edit');
     }, 3000);
   }
 }
@@ -66,6 +80,9 @@ thoughtInputEl.addEventListener('keydown', handleTodoShortcut);
 thoughtInputEl.addEventListener('keydown', handleFontSizeIncrease);
 thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
 thoughtInputEl.addEventListener('keydown', handleToggleModeShortcut);
+thoughtInputEl.addEventListener('keydown', handleFocusModeShortcut);
+thoughtInputEl.addEventListener('mousedown', handleMouseDown);
+thoughtInputEl.addEventListener('selectstart', handleSelectStart);
 
 
 // Ensure a default font size class is set
@@ -74,31 +91,50 @@ if (!thoughtInputEl.className.match(/text-\w+/)) {
 }
 
 async function handleKeyDown(event) {
+  // Allow Cmd+F (or Ctrl+F) to toggle focus mode even when in focus mode
+  if ((event.metaKey || event.ctrlKey) && event.key === 'f') {
+    event.preventDefault();
+    toggleFocusMode();
+    return;
+  }
+
+  if (thoughtInputEl.classList.contains("focus-mode")) {
+    const disabledKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Backspace'];
+    if (disabledKeys.includes(event.key)) {
+      event.preventDefault();
+      return;
+    }
+  }
+
   // Check if the user hit Cmd+Enter (or Ctrl+Enter on Windows)
   if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
     event.preventDefault(); // Prevent the default action (inserting a new line)
-    const thought = thoughtInputEl.value;
-    const mode = document.querySelector("#save-mode").value;
-    const path = mode === "daily" ? dailyPathInputEl.value : standalonePathInputEl.value;
+    await saveThought();
+  }
+}
 
-    // Check if the path is empty
-    if (!path) {
-      updateStatus("no_path");
-      return;
-    }
+async function saveThought() {
+  const thought = thoughtInputEl.value;
+  const mode = document.querySelector("#save-mode").value;
+  const path = mode === "daily" ? dailyPathInputEl.value : standalonePathInputEl.value;
 
-    try {
-      const response = await invoke("save_thought", { thought, path, mode });
-      console.log(response);
-      thoughtInputEl.value = ""; // Clear the textarea after saving
-      window.localStorage.setItem("dailyPath", dailyPathInputEl.value); // Save the daily path to local storage
-      window.localStorage.setItem("standalonePath", standalonePathInputEl.value); // Save the standalone path to local storage
-      window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
-      updateStatus("success");
-    } catch (error) {
-      console.error(error);
-      updateStatus("error"); // Update status to "Failed" on error
-    }
+  // Check if the path is empty
+  if (!path) {
+    updateStatus("no_path");
+    return;
+  }
+
+  try {
+    const response = await invoke("save_thought", { thought, path, mode });
+    console.log(response);
+    thoughtInputEl.value = ""; // Clear the textarea after saving
+    window.localStorage.setItem("dailyPath", dailyPathInputEl.value); // Save the daily path to local storage
+    window.localStorage.setItem("standalonePath", standalonePathInputEl.value); // Save the standalone path to local storage
+    window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
+    updateStatus("success");
+  } catch (error) {
+    console.error(error);
+    updateStatus("error"); // Update status to "Failed" on error
   }
 }
 
@@ -127,6 +163,33 @@ function handleToggleModeShortcut(event) {
     togglePathInputs(); // Toggle the path input fields based on the new mode
   }
 }
+
+function handleFocusModeShortcut(event) {
+  // This function is no longer needed as we handle it in handleKeyDown
+  // to ensure it works even when in focus mode
+}
+
+async function toggleFocusMode() {
+  const isFocusMode = thoughtInputEl.classList.toggle("focus-mode");
+  updateStatus("edit"); // This will now correctly handle the focus mode status
+  thoughtInputEl.focus(); // Ensure the textarea keeps focus after toggling
+  
+  // Set fullscreen based on focus mode state
+  await appWindow.setFullscreen(isFocusMode);
+}
+
+function handleMouseDown(event) {
+  if (thoughtInputEl.classList.contains("focus-mode")) {
+    event.preventDefault();
+  }
+}
+
+function handleSelectStart(event) {
+  if (thoughtInputEl.classList.contains("focus-mode")) {
+    event.preventDefault();
+  }
+}
+
 
 function wrapSelectedText(textarea, prefix, suffix) {
   const start = textarea.selectionStart;

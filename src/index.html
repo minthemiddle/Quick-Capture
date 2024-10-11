@@ -8,17 +8,17 @@
         <script type="module" src="/main.js" defer></script>
     </head>
 
-    <body class="">
-        <div class="flex h-screen flex-col" id="greet-form">
-            <div class="h-96 flex-grow">
+    <body class="flex flex-col h-screen">
+        <div class="flex flex-col flex-grow" id="greet-form">
+            <div class="flex-grow">
                 <textarea
-                    class="h-full w-full resize-none pl-4 pt-4 focus:outline-none"
+                    class="h-full w-full resize-none pl-4 pt-4 focus:outline-none focus-mode:cursor-default focus-mode:select-none"
                     id="thought-input"
                     placeholder="Enter your thought..."
                     autofocus
                 ></textarea>
             </div>
-            <div class="mb-1 flex flex-grow-0 items-center font-mono text-xs">
+            <div class="flex items-center font-mono text-xs p-2">
                 <div class="relative">
                   <select id="save-mode" class="ml-1 form-select appearance-none bg-transparent border border-gray-300 text-gray-700 py-1 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                       <option value="daily">Append to Daily Note</option>

@@ -17,6 +17,20 @@ This will create a standalone note with the given thought.
 
 Every thought is added in the following format: _H2 Timestamp > Text > Newline_ for daily notes. For standalone notes, the format is _H1 Timestamp > Text > Newline_.
 
+**Features**
+- Quick capture of thoughts to daily notes or standalone notes.
+- Supports Markdown text input.
+- Customizable save mode: "Append to Daily Note" or "Save as Standalone Note".
+- Automatic draft saving and restoration.
+- Speed up app launching with Alfred or Raycast and hotkeys.
+- Formatting shortcuts:
+  - Bold: `cmd+b` (Mac) / `ctrl+b` (Windows)
+  - Italic: `cmd+i` (Mac) / `ctrl+i` (Windows)
+  - Link: `cmd+k` (Mac) / `ctrl+k` (Windows)
+  - Todo: `cmd+l` (Mac) / `ctrl+l` (Windows)
+  - Increase Font Size: `cmd++` (Mac) / `ctrl++` (Windows)
+  - Decrease Font Size: `cmd+-` (Mac) / `ctrl+-` (Windows)
+
 **Usage**  
 Copy binary to applications and double-click.  
 Set the save mode to either "Append to Daily Note" or "Save as Standalone Note".  
