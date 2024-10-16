@@ -13,6 +13,12 @@ fn main() {
 }
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+fn prepend_date_header(content: &mut String, date: &str) {
+    if !content.contains(&format!("# {}", date)) {
+        content.insert_str(0, &format!("# {}\n\n", date));
+    }
+}
+
 #[tauri::command]
 async fn save_thought(thought: String, path: String, mode: String) -> Result<String, String> {
     // Check if the path is empty
@@ -21,10 +27,11 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
     }
 
     let now = Local::now();
+    let date = now.format("%Y-%m-%d").to_string();
     let timestamp = now.format("%y%m%d%H%M").to_string();
 
     let file_name = match mode.as_str() {
-        "daily" => format!("{}/{}.md", path, now.format("%Y-%m-%d").to_string()),
+        "daily" => format!("{}/{}.md", path, date),
         "standalone" => format!("{}/{}.md", path, timestamp),
         _ => return Err("Error: Invalid save mode".to_string()),
     };
@@ -35,14 +42,30 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
         create_dir_all(parent).expect("Failed to create directories");
     }
 
+    let mut content = if path.exists() {
+        match std::fs::read_to_string(&path) {
+            Ok(c) => c,
+            Err(_) => String::new(),
+        }
+    } else {
+        String::new()
+    };
+
+    if mode == "daily" && !path.exists() {
+        prepend_date_header(&mut content, &date);
+        content.push_str(&format!("## {}\n{}\n", timestamp, thought));
+    } else if mode == "standalone" {
+        content.push_str(&format!("# {}\n{}\n", timestamp, thought));
+    }
+
     let mut file = OpenOptions::new()
         .create(true)
-        .append(true)
+        .write(true)
+        .truncate(true)
         .open(path)
         .expect("Failed to open file");
 
-    let heading_level = if mode == "standalone" { "#" } else { "##" };
-    if let Err(e) = writeln!(file, "\n{} {}\n{}\n", heading_level, timestamp, thought) {
+    if let Err(e) = file.write_all(content.as_bytes()) {
         return Err(format!("Failed to write to file: {}", e));
     }
 
