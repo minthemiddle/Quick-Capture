@@ -55,7 +55,7 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
         if !path.exists() {
             prepend_date_header(&mut content, &date);
         }
-        content.push_str(&format!("## {}\n{}\n", timestamp, thought));
+        content.push_str(&format!("\n## {}\n{}\n", timestamp, thought));
     } else if mode == "standalone" {
         content.push_str(&format!("# {}\n{}\n", timestamp, thought));
     }
