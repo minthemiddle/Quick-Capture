@@ -1,6 +1,6 @@
 [package]
 name = "quick-capture"
-version = "1.8.1"
+version = "1.8.2"
 description = "Quick Capture to Daily Note"
 authors = ["Martin Betz"]
 edition = "2021"
