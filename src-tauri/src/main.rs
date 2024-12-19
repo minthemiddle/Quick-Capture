@@ -36,7 +36,7 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
         _ => return Err("Error: Invalid save mode".to_string()),
     };
 
-    let path = PathBuf::from(file_name);
+    let path = PathBuf::from(&file_name);
 
     if let Some(parent) = path.parent() {
         create_dir_all(parent).expect("Failed to create directories");
@@ -57,7 +57,44 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
         }
         content.push_str(&format!("\n## {}\n{}\n", timestamp, thought));
     } else if mode == "standalone" {
+        // Save standalone note
         content.push_str(&format!("# {}\n{}\n", timestamp, thought));
+        
+        // Create/update daily note with backlink
+        let daily_path = PathBuf::from(format!("{}/{}.md", path.parent().unwrap().to_str().unwrap(), date));
+        let mut daily_content = if daily_path.exists() {
+            match std::fs::read_to_string(&daily_path) {
+                Ok(c) => c,
+                Err(_) => String::new(),
+            }
+        } else {
+            let mut new_content = String::new();
+            prepend_date_header(&mut new_content, &date);
+            new_content
+        };
+
+        // Get first line of thought for link description (up to 10 chars, no special chars)
+        let desc = thought
+            .lines()
+            .next()
+            .unwrap_or("")
+            .chars()
+            .filter(|c| c.is_alphanumeric() || c.is_whitespace())
+            .take(10)
+            .collect::<String>();
+
+        daily_content.push_str(&format!("\n## {}\n[[{}|{}]]\n", timestamp, timestamp, desc));
+
+        let mut daily_file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(daily_path)
+            .expect("Failed to open daily file");
+
+        if let Err(e) = daily_file.write_all(daily_content.as_bytes()) {
+            return Err(format!("Failed to write to daily file: {}", e));
+        }
     }
 
     let mut file = OpenOptions::new()
