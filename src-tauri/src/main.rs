@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![save_thought])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -59,9 +60,13 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
     } else if mode == "standalone" {
         // Save standalone note
         content.push_str(&format!("# {}\n{}\n", timestamp, thought));
-        
+
         // Create/update daily note with backlink
-        let daily_path = PathBuf::from(format!("{}/{}.md", path.parent().unwrap().to_str().unwrap(), date));
+        let daily_path = PathBuf::from(format!(
+            "{}/{}.md",
+            path.parent().unwrap().to_str().unwrap(),
+            date
+        ));
         let mut daily_content = if daily_path.exists() {
             match std::fs::read_to_string(&daily_path) {
                 Ok(c) => c,

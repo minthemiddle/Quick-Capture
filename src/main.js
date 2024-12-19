@@ -1,4 +1,4 @@
-const { invoke } = window.__TAURI__.tauri;
+const invoke = window.__TAURI__.core.invoke;
 
 const saveThoughtBtn = document.querySelector("#save-thought");
 const thoughtInputEl = document.querySelector("#thought-input");
