@@ -107,13 +107,8 @@ function togglePathInputs() {
   const dailyPathLabel = document.getElementById("daily-path-label");
   const standalonePathLabel = document.getElementById("standalone-path-label");
 
-  if (mode === "daily") {
-    dailyPathLabel.classList.remove("hidden");
-    standalonePathLabel.classList.add("hidden");
-  } else if (mode === "standalone") {
-    dailyPathLabel.classList.add("hidden");
-    standalonePathLabel.classList.remove("hidden");
-  }
+  dailyPathLabel.classList.toggle("hidden", mode !== "daily");
+  standalonePathLabel.classList.toggle("hidden", mode !== "standalone");
 }
 
 function handleToggleModeShortcut(event) {
