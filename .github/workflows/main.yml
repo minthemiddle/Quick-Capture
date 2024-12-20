@@ -53,6 +53,9 @@ jobs:
       - name: install frontend dependencies
         # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
         run: npm install # change this to npm or pnpm depending on which one you use.
+        
+      - name: build CSS
+        run: npx tailwindcss -i src/in.css -o src/out.css --minify
 
       - uses: tauri-apps/tauri-action@v0
         env:
