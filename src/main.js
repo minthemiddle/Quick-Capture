@@ -88,7 +88,9 @@ async function handleKeyDown(event) {
     }
 
     try {
-      const response = await invoke("save_thought", { thought, path, mode });
+      // Always pass dailyPath for backlinks when in standalone mode
+      const dailyPath = dailyPathInputEl.value;
+      const response = await invoke("save_thought", { thought, path, mode, dailyPath });
       console.log(response);
       thoughtInputEl.value = ""; // Clear the textarea after saving
       window.localStorage.setItem("dailyPath", dailyPathInputEl.value); // Save the daily path to local storage

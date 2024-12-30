@@ -21,7 +21,7 @@ fn prepend_date_header(content: &mut String, date: &str) {
 }
 
 #[tauri::command]
-async fn save_thought(thought: String, path: String, mode: String) -> Result<String, String> {
+async fn save_thought(thought: String, path: String, mode: String, daily_path: Option<String>) -> Result<String, String> {
     // Check if the path is empty
     if path.is_empty() {
         return Err("Error: Path cannot be empty".to_string());
@@ -61,12 +61,15 @@ async fn save_thought(thought: String, path: String, mode: String) -> Result<Str
         // Save standalone note
         content.push_str(&format!("# {}\n{}\n", timestamp, thought));
 
-        // Create/update daily note with backlink
-        let daily_path = PathBuf::from(format!(
-            "{}/{}.md",
-            path.parent().unwrap().to_str().unwrap(),
-            date
-        ));
+        // Create/update daily note with backlink using the provided daily_path
+        let daily_path = if let Some(daily_dir) = daily_path {
+            if daily_dir.is_empty() {
+                return Err("Error: Daily path is required for standalone notes".to_string());
+            }
+            PathBuf::from(format!("{}/{}.md", daily_dir, date))
+        } else {
+            return Err("Error: Daily path is required for standalone notes".to_string());
+        };
         let mut daily_content = if daily_path.exists() {
             match std::fs::read_to_string(&daily_path) {
                 Ok(c) => c,
