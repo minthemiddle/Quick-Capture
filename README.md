@@ -5,6 +5,7 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 ## Features
 
 - **Quick Capture:** A plain multiline text area for capturing thoughts
+- **Focus Mode:** Prevent editing of written text to maintain flow (`cmd+f`/`ctrl+f`)
 - **Markdown Support:** Input is interpreted as Markdown
 - **Daily and Standalone Notes:** Save thoughts to daily notes or as standalone notes
 - **Path Configuration:** Set the path for daily notes and standalone notes via input fields
@@ -54,6 +55,7 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 | Create todo item        | `cmd + l`        | `ctrl + l`       |
 | Increase font size      | `cmd + +`        | `ctrl + +`       |
 | Decrease font size      | `cmd + -`        | `ctrl + -`       |
+| Toggle focus mode       | `cmd + f`        | `ctrl + f`       |
 
 *Note: Formatting shortcuts add formatting to the selected text or at the cursor position. Applying a shortcut multiple times adds multiple formatting marks.*
 

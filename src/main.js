@@ -7,6 +7,8 @@ const standalonePathInputEl = document.querySelector("#standalone-path-input");
 const statusEl = document.querySelector("#status");
 const statusIconEl = document.querySelector("#status-icon");
 
+let focusModeEnabled = false;
+
 const statusUpdates = {
   success: {
     message: "Added",
@@ -23,8 +25,37 @@ const statusUpdates = {
   no_path: {
     message: "No path",
     iconClass: "text-red-500"
+  },
+  focus_on: {
+    message: "Focus On",
+    iconClass: "text-blue-500"
+  },
+  focus_off: {
+    message: "Focus Off", 
+    iconClass: "text-slate-200"
   }
 };
+
+function toggleFocusMode() {
+  focusModeEnabled = !focusModeEnabled;
+  thoughtInputEl.style.userSelect = focusModeEnabled ? 'none' : 'text';
+  
+  if (focusModeEnabled) {
+    // Move cursor to end when enabling focus mode
+    thoughtInputEl.selectionStart = thoughtInputEl.value.length;
+    thoughtInputEl.selectionEnd = thoughtInputEl.value.length;
+    updateStatus("focus_on");
+  } else {
+    updateStatus("focus_off");
+  }
+}
+
+function handleFocusModeShortcut(event) {
+  if ((event.metaKey || event.ctrlKey) && event.key === 'f') {
+    event.preventDefault();
+    toggleFocusMode();
+  }
+}
 
 function debounce(func, wait) {
   let timeout;
@@ -66,6 +97,43 @@ thoughtInputEl.addEventListener('keydown', handleTodoShortcut);
 thoughtInputEl.addEventListener('keydown', handleFontSizeIncrease);
 thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
 thoughtInputEl.addEventListener('keydown', handleToggleModeShortcut);
+thoughtInputEl.addEventListener('keydown', handleFocusModeShortcut);
+
+// Prevent editing when in focus mode
+thoughtInputEl.addEventListener('keydown', (event) => {
+  if (focusModeEnabled) {
+    // Allow: Arrow keys, Enter, Tab, Modifier keys
+    const allowedKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Meta', 'Control', 'Alt', 'Shift'];
+    
+    // Prevent deletion keys
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      event.preventDefault();
+      return;
+    }
+    
+    // Prevent selection with keyboard
+    if (event.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
+      event.preventDefault();
+      return;
+    }
+    
+    // Prevent cut/copy/paste
+    if ((event.metaKey || event.ctrlKey) && ['x', 'c', 'v'].includes(event.key)) {
+      event.preventDefault();
+      return;
+    }
+  }
+});
+
+// Prevent mouse selection in focus mode
+thoughtInputEl.addEventListener('mousedown', (event) => {
+  if (focusModeEnabled) {
+    event.preventDefault();
+    // Move cursor to end
+    thoughtInputEl.selectionStart = thoughtInputEl.value.length;
+    thoughtInputEl.selectionEnd = thoughtInputEl.value.length;
+  }
+});
 
 
 // Ensure a default font size class is set
