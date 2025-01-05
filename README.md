@@ -86,13 +86,20 @@ The app has an icon as well
 
 ## Building from Source
 
-### Prerequisites
-- Rust (install via [rustup](https://rustup.rs/))
-- Node.js and npm
-
 ### Build Steps
 
 ```bash
+# If no rust installed yet
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# If no node and npm installed yet
+# For MacOS
+brew install node
+# For Ubuntu
+sudo apt install nodejs npm
+# For Windows
+choco install nodejs
+
 # Install Tauri CLI
 cargo install tauri-cli
 
