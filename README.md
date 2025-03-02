@@ -71,6 +71,7 @@ Quick Capture includes a stash system that lets you temporarily save up to 10 th
 | Save to stash           | `cmd + s`        | `ctrl + s`       |
 | Apply recent stash      | `cmd + shift + s`| `ctrl + shift + s`|
 | Apply specific stash    | `cmd + shift + [1-9]` | `ctrl + shift + [1-9]` |
+| View stashes            | `cmd + shift + l`     | `ctrl + shift + l`     |
 
 *Note: Formatting shortcuts add formatting to the selected text or at the cursor position. Applying a shortcut multiple times adds multiple formatting marks.*
 

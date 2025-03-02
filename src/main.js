@@ -31,8 +31,15 @@ const statusUpdates = {
   stash_applied: {
     message: "Applied",
     iconClass: "text-blue-500"
+  },
+  stash_view: {
+    message: "Viewing Stashes",
+    iconClass: "text-blue-500"
   }
 };
+
+let isViewingStashes = false;
+let previousContent = '';
 
 // Stash management
 const MAX_STASHES = 10;
@@ -183,6 +190,39 @@ function handleStashShortcut(event) {
     event.preventDefault();
     const index = parseInt(event.key) - 1;
     applyStash(index);
+  }
+
+  // Cmd+Shift+L to toggle stash list view
+  if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'l') {
+    event.preventDefault();
+    toggleStashListView();
+  }
+}
+
+function toggleStashListView() {
+  if (isViewingStashes) {
+    // Restore previous content
+    thoughtInputEl.value = previousContent;
+    thoughtInputEl.readOnly = false;
+    thoughtInputEl.classList.remove('bg-gray-100', 'text-gray-500');
+    isViewingStashes = false;
+    updateStatus('edit');
+  } else {
+    // Save current content and show stashes
+    previousContent = thoughtInputEl.value;
+    const stashes = getStashes();
+    if (stashes.length > 0) {
+      const stashList = stashes.map((stash, index) => {
+        const date = new Date(stash.timestamp).toLocaleString();
+        return `${index + 1}. [${date}]\n${stash.content}\n`;
+      }).join('\n');
+      
+      thoughtInputEl.value = `--- Stashes (Read-Only) ---\n\n${stashList}`;
+      thoughtInputEl.readOnly = true;
+      thoughtInputEl.classList.add('bg-gray-100', 'text-gray-500');
+      isViewingStashes = true;
+      updateStatus('stash_view');
+    }
   }
 }
 
