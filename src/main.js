@@ -159,7 +159,12 @@ function handleStashShortcut(event) {
   // Cmd+S to save stash
   if ((event.metaKey || event.ctrlKey) && event.key === 's' && !event.shiftKey) {
     event.preventDefault();
-    saveStash(thoughtInputEl.value);
+    const thought = thoughtInputEl.value.trim();
+    if (thought) {
+      saveStash(thought);
+      thoughtInputEl.value = ""; // Clear the input field
+      saveDraft(); // Update the draft state
+    }
     return;
   }
 
