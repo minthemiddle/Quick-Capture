@@ -23,8 +23,49 @@ const statusUpdates = {
   no_path: {
     message: "No path",
     iconClass: "text-red-500"
+  },
+  stash_saved: {
+    message: "Stashed",
+    iconClass: "text-blue-500"
+  },
+  stash_applied: {
+    message: "Applied",
+    iconClass: "text-blue-500"
   }
 };
+
+// Stash management
+const MAX_STASHES = 10;
+const STASH_KEY = 'stashes';
+
+function getStashes() {
+  const stashes = JSON.parse(window.localStorage.getItem(STASH_KEY) || '[]');
+  return stashes;
+}
+
+function saveStash(content) {
+  const stashes = getStashes();
+  const newStash = {
+    content,
+    timestamp: new Date().toISOString()
+  };
+  
+  stashes.unshift(newStash);
+  if (stashes.length > MAX_STASHES) {
+    stashes.pop();
+  }
+  
+  window.localStorage.setItem(STASH_KEY, JSON.stringify(stashes));
+  updateStatus('stash_saved');
+}
+
+function applyStash(index) {
+  const stashes = getStashes();
+  if (index >= 0 && index < stashes.length) {
+    thoughtInputEl.value = stashes[index].content;
+    updateStatus('stash_applied');
+  }
+}
 
 function debounce(func, wait) {
   let timeout;
@@ -66,6 +107,7 @@ thoughtInputEl.addEventListener('keydown', handleTodoShortcut);
 thoughtInputEl.addEventListener('keydown', handleFontSizeIncrease);
 thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
 thoughtInputEl.addEventListener('keydown', handleToggleModeShortcut);
+thoughtInputEl.addEventListener('keydown', handleStashShortcut);
 
 
 // Ensure a default font size class is set
@@ -111,6 +153,32 @@ function togglePathInputs() {
 
   dailyPathLabel.classList.toggle("hidden", mode !== "daily");
   standalonePathLabel.classList.toggle("hidden", mode !== "standalone");
+}
+
+function handleStashShortcut(event) {
+  // Cmd+S to save stash
+  if ((event.metaKey || event.ctrlKey) && event.key === 's' && !event.shiftKey) {
+    event.preventDefault();
+    saveStash(thoughtInputEl.value);
+    return;
+  }
+
+  // Cmd+Shift+S to apply stash
+  if ((event.metaKey || event.ctrlKey) && event.key === 's' && event.shiftKey) {
+    event.preventDefault();
+    const stashes = getStashes();
+    if (stashes.length > 0) {
+      applyStash(0); // Apply most recent stash
+    }
+    return;
+  }
+
+  // Cmd+Shift+Number to apply specific stash
+  if ((event.metaKey || event.ctrlKey) && event.shiftKey && /^[1-9]$/.test(event.key)) {
+    event.preventDefault();
+    const index = parseInt(event.key) - 1;
+    applyStash(index);
+  }
 }
 
 function handleToggleModeShortcut(event) {

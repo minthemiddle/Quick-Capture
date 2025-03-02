@@ -42,6 +42,20 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 - Uses the first 10 alphanumeric characters of the thought as the link description
 - Adds an H1 timestamp heading to the standalone note
 
+## Stash Feature
+
+Quick Capture includes a stash system that lets you temporarily save up to 10 thoughts for later use. This is useful when you want to quickly capture multiple thoughts without saving them to your notes yet.
+
+### Stash Operations
+
+- **Save to Stash:** `cmd + s` (Mac) / `ctrl + s` (Windows)
+  - Saves the current thought to the top of your stash
+  - Clears the input field after saving
+- **Apply Most Recent Stash:** `cmd + shift + s` (Mac) / `ctrl + shift + s` (Windows)
+  - Inserts the most recently saved thought into the input field
+- **Apply Specific Stash:** `cmd + shift + [1-9]` (Mac) / `ctrl + shift + [1-9]` (Windows)
+  - Applies the thought from the corresponding stash position (1-9)
+
 ## Keyboard Shortcuts
 
 | Action                  | Mac Shortcut     | Windows Shortcut |
@@ -54,6 +68,9 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 | Create todo item        | `cmd + l`        | `ctrl + l`       |
 | Increase font size      | `cmd + +`        | `ctrl + +`       |
 | Decrease font size      | `cmd + -`        | `ctrl + -`       |
+| Save to stash           | `cmd + s`        | `ctrl + s`       |
+| Apply recent stash      | `cmd + shift + s`| `ctrl + shift + s`|
+| Apply specific stash    | `cmd + shift + [1-9]` | `ctrl + shift + [1-9]` |
 
 *Note: Formatting shortcuts add formatting to the selected text or at the cursor position. Applying a shortcut multiple times adds multiple formatting marks.*
 
@@ -64,6 +81,13 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 - **Link:** `[selected text](|)` or `[](|)` if no text is selected
 - **Todo:** `- [ ] selected text` or `- [ ] ` if no text is selected
 - The `|` indicates where the cursor will be placed after hitting the shortcut
+
+**Stash Example**
+
+1. Type a thought and press `cmd+s` to save it to stash
+2. Type another thought and save it
+3. Press `cmd+shift+s` to apply the most recent stash
+4. Press `cmd+shift+1` to apply the first stash in your list
 
 **Screenshot and Screencast**  
 
