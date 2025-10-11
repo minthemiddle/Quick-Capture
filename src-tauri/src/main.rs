@@ -8,6 +8,7 @@ use std::path::PathBuf;
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![save_thought])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -31,20 +32,20 @@ async fn save_thought(thought: String, path: String, mode: String, daily_path: O
     let date = now.format("%Y-%m-%d").to_string();
     let timestamp = now.format("%y%m%d%H%M").to_string();
 
-    let file_name = match mode.as_str() {
-        "daily" => format!("{}/{}.md", path, date),
-        "standalone" => format!("{}/{}.md", path, timestamp),
+    let mut path_buf = PathBuf::from(&path);
+
+    match mode.as_str() {
+        "daily" => path_buf.push(format!("{}.md", date)),
+        "standalone" => path_buf.push(format!("{}.md", timestamp)),
         _ => return Err("Error: Invalid save mode".to_string()),
     };
 
-    let path = PathBuf::from(&file_name);
-
-    if let Some(parent) = path.parent() {
+    if let Some(parent) = path_buf.parent() {
         create_dir_all(parent).expect("Failed to create directories");
     }
 
-    let mut content = if path.exists() {
-        match std::fs::read_to_string(&path) {
+    let mut content = if path_buf.exists() {
+        match std::fs::read_to_string(&path_buf) {
             Ok(c) => c,
             Err(_) => String::new(),
         }
@@ -53,7 +54,7 @@ async fn save_thought(thought: String, path: String, mode: String, daily_path: O
     };
 
     if mode == "daily" {
-        if !path.exists() {
+        if !path_buf.exists() {
             prepend_date_header(&mut content, &date);
         }
         content.push_str(&format!("\n## {}\n{}\n", timestamp, thought));
@@ -66,7 +67,9 @@ async fn save_thought(thought: String, path: String, mode: String, daily_path: O
             if daily_dir.is_empty() {
                 return Err("Error: Daily path is required for standalone notes".to_string());
             }
-            PathBuf::from(format!("{}/{}.md", daily_dir, date))
+            let mut daily_buf = PathBuf::from(daily_dir);
+            daily_buf.push(format!("{}.md", date));
+            daily_buf
         } else {
             return Err("Error: Daily path is required for standalone notes".to_string());
         };
@@ -109,7 +112,7 @@ async fn save_thought(thought: String, path: String, mode: String, daily_path: O
         .create(true)
         .write(true)
         .truncate(true)
-        .open(path)
+        .open(&path_buf)
         .expect("Failed to open file");
 
     if let Err(e) = file.write_all(content.as_bytes()) {

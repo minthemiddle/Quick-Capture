@@ -1,11 +1,20 @@
 const invoke = window.__TAURI__.core.invoke;
+const { open } = window.__TAURI__.dialog;
 
 const saveThoughtBtn = document.querySelector("#save-thought");
 const thoughtInputEl = document.querySelector("#thought-input");
-const dailyPathInputEl = document.querySelector("#daily-path-input");
-const standalonePathInputEl = document.querySelector("#standalone-path-input");
+const dailyPathButtonEl = document.querySelector("#daily-path-button");
+const standalonePathButtonEl = document.querySelector("#standalone-path-button");
+const dailyPathDisplayEl = document.querySelector("#daily-path-display");
+const standalonePathDisplayEl = document.querySelector("#standalone-path-display");
+const dailyPathContainerEl = document.querySelector("#daily-path-container");
+const standalonePathContainerEl = document.querySelector("#standalone-path-container");
 const statusEl = document.querySelector("#status");
 const statusIconEl = document.querySelector("#status-icon");
+
+// Store paths in memory instead of inputs
+let dailyPath = "";
+let standalonePath = "";
 
 const statusUpdates = {
   success: {
@@ -128,7 +137,7 @@ async function handleKeyDown(event) {
     event.preventDefault(); // Prevent the default action (inserting a new line)
     const thought = thoughtInputEl.value;
     const mode = document.querySelector("#save-mode").value;
-    const path = mode === "daily" ? dailyPathInputEl.value : standalonePathInputEl.value;
+    const path = mode === "daily" ? dailyPath : standalonePath;
 
     // Check if the path is empty
     if (!path) {
@@ -138,12 +147,12 @@ async function handleKeyDown(event) {
 
     try {
       // Always pass dailyPath for backlinks when in standalone mode
-      const dailyPath = dailyPathInputEl.value;
-      const response = await invoke("save_thought", { thought, path, mode, dailyPath });
+      const dailyPathForBacklinks = dailyPath;
+      const response = await invoke("save_thought", { thought, path, mode, dailyPath: dailyPathForBacklinks });
       console.log(response);
       thoughtInputEl.value = ""; // Clear the textarea after saving
-      window.localStorage.setItem("dailyPath", dailyPathInputEl.value); // Save the daily path to local storage
-      window.localStorage.setItem("standalonePath", standalonePathInputEl.value); // Save the standalone path to local storage
+      window.localStorage.setItem("dailyPath", dailyPath); // Save the daily path to local storage
+      window.localStorage.setItem("standalonePath", standalonePath); // Save the standalone path to local storage
       window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
       updateStatus("success");
     } catch (error) {
@@ -155,11 +164,9 @@ async function handleKeyDown(event) {
 
 function togglePathInputs() {
   const mode = document.getElementById("save-mode").value;
-  const dailyPathLabel = document.getElementById("daily-path-label");
-  const standalonePathLabel = document.getElementById("standalone-path-label");
 
-  dailyPathLabel.classList.toggle("hidden", mode !== "daily");
-  standalonePathLabel.classList.toggle("hidden", mode !== "standalone");
+  dailyPathContainerEl.classList.toggle("hidden", mode !== "daily");
+  standalonePathContainerEl.classList.toggle("hidden", mode !== "standalone");
 }
 
 function handleStashShortcut(event) {
@@ -353,17 +360,92 @@ function handleFontSizeDecrease(event) {
 }
 
 
+// Helper function to truncate long paths elegantly
+function truncatePath(path, maxLength = 50) {
+  if (!path || path.length <= maxLength) return path;
+
+  const parts = path.split('/');
+  if (parts.length < 3) return path;
+
+  const start = parts[0]; // Usually empty or "/" on Unix
+  const end = parts.slice(-2).join('/'); // Last two parts (folder and parent)
+
+  return `${start}/.../${end}`;
+}
+
+// Dialog event handlers
+async function handleDailyPathSelect() {
+  try {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: "Select Daily Notes Folder"
+    });
+
+    if (selected) {
+      dailyPath = selected;
+      const displayPath = truncatePath(selected);
+      dailyPathDisplayEl.textContent = displayPath;
+      dailyPathDisplayEl.title = selected; // Full path on hover
+      dailyPathDisplayEl.classList.remove("text-gray-400");
+      dailyPathDisplayEl.classList.add("text-gray-700");
+    }
+  } catch (error) {
+    console.error("Failed to select directory:", error);
+  }
+}
+
+async function handleStandalonePathSelect() {
+  try {
+    const selected = await open({
+      directory: true,
+      multiple: false,
+      title: "Select Standalone Notes Folder"
+    });
+
+    if (selected) {
+      standalonePath = selected;
+      const displayPath = truncatePath(selected);
+      standalonePathDisplayEl.textContent = displayPath;
+      standalonePathDisplayEl.title = selected; // Full path on hover
+      standalonePathDisplayEl.classList.remove("text-gray-400");
+      standalonePathDisplayEl.classList.add("text-gray-700");
+    }
+  } catch (error) {
+    console.error("Failed to select directory:", error);
+  }
+}
+
 window.addEventListener("DOMContentLoaded", () => {
+  // Add event listeners for dialog buttons
+  if (dailyPathButtonEl) {
+    dailyPathButtonEl.addEventListener("click", handleDailyPathSelect);
+  }
+
+  if (standalonePathButtonEl) {
+    standalonePathButtonEl.addEventListener("click", handleStandalonePathSelect);
+  }
+
   // Load the daily path from local storage
-  const dailyPath = window.localStorage.getItem("dailyPath");
-  if (dailyPath) {
-    dailyPathInputEl.value = dailyPath;
+  const savedDailyPath = window.localStorage.getItem("dailyPath");
+  if (savedDailyPath) {
+    dailyPath = savedDailyPath;
+    const displayPath = truncatePath(savedDailyPath);
+    dailyPathDisplayEl.textContent = displayPath;
+    dailyPathDisplayEl.title = savedDailyPath; // Full path on hover
+    dailyPathDisplayEl.classList.remove("text-gray-400");
+    dailyPathDisplayEl.classList.add("text-gray-700");
   }
 
   // Load the standalone path from local storage
-  const standalonePath = window.localStorage.getItem("standalonePath");
-  if (standalonePath) {
-    standalonePathInputEl.value = standalonePath;
+  const savedStandalonePath = window.localStorage.getItem("standalonePath");
+  if (savedStandalonePath) {
+    standalonePath = savedStandalonePath;
+    const displayPath = truncatePath(savedStandalonePath);
+    standalonePathDisplayEl.textContent = displayPath;
+    standalonePathDisplayEl.title = savedStandalonePath; // Full path on hover
+    standalonePathDisplayEl.classList.remove("text-gray-400");
+    standalonePathDisplayEl.classList.add("text-gray-700");
   }
 
   // Load the draft thought from local storage

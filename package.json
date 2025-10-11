@@ -1,8 +1,13 @@
 {
+  "scripts": {
+    "build-css": "npx tailwindcss -i ./src/in.css -o ./src/out.css --minify",
+    "watch-css": "npx tailwindcss -i ./src/in.css -o ./src/out.css --minify --watch"
+  },
   "devDependencies": {
     "tailwindcss": "^3.4.1"
   },
   "dependencies": {
-    "@tauri-apps/plugin-shell": "^2.2.0"
+    "@tauri-apps/plugin-dialog": "^2.4.0",
+    "@tauri-apps/plugin-shell": "^2.3.1"
   }
 }
