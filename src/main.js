@@ -33,6 +33,10 @@ const statusUpdates = {
     message: "No path",
     iconClass: "text-red-500"
   },
+  empty_content: {
+    message: "Empty note",
+    iconClass: "text-red-500"
+  },
   stash_saved: {
     message: "Stashed",
     iconClass: "text-blue-500"
@@ -138,6 +142,12 @@ async function handleKeyDown(event) {
     const thought = thoughtInputEl.value;
     const mode = document.querySelector("#save-mode").value;
     const path = mode === "daily" ? dailyPath : standalonePath;
+
+    // Check if the content is empty or only whitespace
+    if (!thought.trim()) {
+      updateStatus("empty_content");
+      return;
+    }
 
     // Check if the path is empty
     if (!path) {
