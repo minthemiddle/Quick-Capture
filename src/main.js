@@ -59,6 +59,10 @@ const statusUpdates = {
     message: "Viewing Stashes",
     iconClass: "text-blue-500"
   },
+  stash_deleted: {
+    message: "Deleted",
+    iconClass: "text-orange-500"
+  },
   endpoint_settings_saved: {
     message: "Settings saved",
     iconClass: "text-green-500"
@@ -109,6 +113,16 @@ function applyStash(index) {
   }
 }
 
+function deleteStash(index) {
+  const stashes = getStashes();
+  if (index >= 0 && index < stashes.length) {
+    stashes.splice(index, 1);
+    window.localStorage.setItem(STASH_KEY, JSON.stringify(stashes));
+    updateStatus('stash_deleted');
+  }
+  return stashes;
+}
+
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -146,6 +160,7 @@ thoughtInputEl.addEventListener('keydown', handleBoldShortcut);
 thoughtInputEl.addEventListener('keydown', handleItalicShortcut);
 thoughtInputEl.addEventListener('keydown', handleLinkShortcut);
 thoughtInputEl.addEventListener('keydown', handleTodoShortcut);
+thoughtInputEl.addEventListener('keydown', handleStashViewKeydown);
 thoughtInputEl.addEventListener('keydown', handleFontSizeIncrease);
 thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
 thoughtInputEl.addEventListener('keydown', handleToggleModeShortcut);
@@ -274,24 +289,33 @@ function handleStashShortcut(event) {
 
 function toggleStashListView() {
   if (isViewingStashes) {
-    // Restore previous content
+    // Exit stash view mode
     thoughtInputEl.value = previousContent;
     thoughtInputEl.readOnly = false;
     thoughtInputEl.classList.remove('bg-gray-100', 'text-gray-500');
     isViewingStashes = false;
     updateStatus('edit');
   } else {
-    // Save current content and show stashes
+    // Enter stash view mode
     previousContent = thoughtInputEl.value;
     const stashes = getStashes();
     if (stashes.length > 0) {
       const stashList = stashes.map((stash, index) => {
         const date = new Date(stash.timestamp).toLocaleString();
-        return `${index + 1}. [${date}]\n${stash.content}\n`;
+        const num = index + 1;
+        const content = stash.content.split('\n')[0]; // First line only
+        const truncated = content.length > 50 ? content.substring(0, 50) + '...' : content;
+        return `${num}. [${date}]\n   ${truncated}\n   [a]pply [d]elete+apply [x] delete\n`;
       }).join('\n');
-      
-      thoughtInputEl.value = `--- Stashes (Read-Only) ---\n\n${stashList}`;
-      thoughtInputEl.readOnly = true;
+
+      thoughtInputEl.value = `--- Stashes ---\nActions: a=apply, d=apply+delete, x=delete, esc=exit\nFormat: {a|d|x}{number} or just {a|d|x} for #1\n\n${stashList}`;
+      thoughtInputEl.readOnly = false; // Make editable for commands
+      thoughtInputEl.classList.add('bg-gray-100', 'text-gray-500');
+      isViewingStashes = true;
+      updateStatus('stash_view');
+    } else {
+      thoughtInputEl.value = "--- No stashes yet ---\nPress cmd+s to save a stash";
+      thoughtInputEl.readOnly = false;
       thoughtInputEl.classList.add('bg-gray-100', 'text-gray-500');
       isViewingStashes = true;
       updateStatus('stash_view');
@@ -330,6 +354,63 @@ function toggleEndpointSettingsView() {
     thoughtInputEl.classList.add('bg-gray-100', 'text-gray-500');
     isEditingEndpointSettings = true;
     updateStatus('edit');
+  }
+}
+
+function handleStashViewKeydown(event) {
+  if (!isViewingStashes) return;
+
+  // Handle Escape to exit stash view
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    toggleStashListView();
+    return;
+  }
+
+  // Handle Enter to execute commands
+  if (event.key === 'Enter') {
+    const content = thoughtInputEl.value;
+    const lines = content.split('\n');
+    const lastLine = lines[lines.length - 1].trim();
+
+    // Parse command: single character + optional number
+    const match = lastLine.match(/^([adx])(\d*)$/i);
+    if (match) {
+      event.preventDefault();
+      const action = match[1].toLowerCase();
+      const numStr = match[2];
+      const index = numStr ? parseInt(numStr) - 1 : 0; // Default to 0 (first stash)
+      const stashes = getStashes();
+
+      if (index < 0 || index >= stashes.length) {
+        // Invalid stash number, refresh the view
+        toggleStashListView();
+        toggleStashListView();
+        return;
+      }
+
+      switch (action) {
+        case 'a': // Apply stash
+          applyStash(index);
+          isViewingStashes = false; // Exit stash view after applying
+          thoughtInputEl.classList.remove('bg-gray-100', 'text-gray-500');
+          updateStatus('stash_applied');
+          break;
+        case 'd': // Apply and delete
+          applyStash(index);
+          deleteStash(index);
+          isViewingStashes = false;
+          thoughtInputEl.classList.remove('bg-gray-100', 'text-gray-500');
+          updateStatus('stash_applied');
+          break;
+        case 'x': // Delete only
+          deleteStash(index);
+          // Refresh stash view
+          toggleStashListView();
+          toggleStashListView();
+          break;
+      }
+    }
   }
 }
 
