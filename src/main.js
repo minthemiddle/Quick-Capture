@@ -9,12 +9,26 @@ const dailyPathDisplayEl = document.querySelector("#daily-path-display");
 const standalonePathDisplayEl = document.querySelector("#standalone-path-display");
 const dailyPathContainerEl = document.querySelector("#daily-path-container");
 const standalonePathContainerEl = document.querySelector("#standalone-path-container");
+const endpointConfigContainerEl = document.querySelector("#endpoint-config-container");
+const endpointConfigDisplayEl = document.querySelector("#endpoint-config-display");
 const statusEl = document.querySelector("#status");
 const statusIconEl = document.querySelector("#status-icon");
 
 // Store paths in memory instead of inputs
 let dailyPath = "";
 let standalonePath = "";
+
+// Endpoint configuration
+let endpointConfig = {
+  url: "",
+  authType: "none",
+  bearerToken: "",
+  username: "",
+  password: "",
+  extraHeaders: ""
+};
+
+let isEditingEndpointSettings = false;
 
 const statusUpdates = {
   success: {
@@ -33,10 +47,6 @@ const statusUpdates = {
     message: "No path",
     iconClass: "text-red-500"
   },
-  empty_content: {
-    message: "Empty note",
-    iconClass: "text-red-500"
-  },
   stash_saved: {
     message: "Stashed",
     iconClass: "text-blue-500"
@@ -48,6 +58,18 @@ const statusUpdates = {
   stash_view: {
     message: "Viewing Stashes",
     iconClass: "text-blue-500"
+  },
+  endpoint_settings_saved: {
+    message: "Settings saved",
+    iconClass: "text-green-500"
+  },
+  endpoint_settings_invalid: {
+    message: "Invalid settings",
+    iconClass: "text-red-500"
+  },
+  no_endpoint: {
+    message: "No endpoint",
+    iconClass: "text-red-500"
   }
 };
 
@@ -129,6 +151,10 @@ thoughtInputEl.addEventListener('keydown', handleFontSizeDecrease);
 thoughtInputEl.addEventListener('keydown', handleToggleModeShortcut);
 thoughtInputEl.addEventListener('keydown', handleStashShortcut);
 
+// Endpoint shortcuts - defined later but hoisted
+thoughtInputEl.addEventListener('keydown', handleEndpointPost);
+thoughtInputEl.addEventListener('keydown', handleEndpointSettingsShortcut);
+
 
 // Ensure a default font size class is set
 if (!thoughtInputEl.className.match(/text-\w+/)) {
@@ -141,13 +167,42 @@ async function handleKeyDown(event) {
     event.preventDefault(); // Prevent the default action (inserting a new line)
     const thought = thoughtInputEl.value;
     const mode = document.querySelector("#save-mode").value;
-    const path = mode === "daily" ? dailyPath : standalonePath;
 
-    // Check if the content is empty or only whitespace
-    if (!thought.trim()) {
-      updateStatus("empty_content");
+    // Handle endpoint mode
+    if (mode === "endpoint") {
+      // Check if endpoint is configured
+      if (!endpointConfig.url) {
+        updateStatus("no_endpoint");
+        return;
+      }
+
+      if (!thought.trim()) {
+        return;
+      }
+
+      try {
+        const response = await invoke("post_to_endpoint", {
+          content: thought,
+          url: endpointConfig.url,
+          authType: endpointConfig.authType,
+          authToken: endpointConfig.authType === 'bearer' ? endpointConfig.bearerToken : null,
+          username: endpointConfig.authType === 'basic' ? endpointConfig.username : null,
+          password: endpointConfig.authType === 'basic' ? endpointConfig.password : null,
+          extraHeaders: endpointConfig.extraHeaders || null
+        });
+        console.log(response);
+        thoughtInputEl.value = ""; // Clear the textarea after sending
+        window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
+        updateStatus("success");
+      } catch (error) {
+        console.error(error);
+        updateStatus("error");
+      }
       return;
     }
+
+    // Handle file-based modes (daily and standalone)
+    const path = mode === "daily" ? dailyPath : standalonePath;
 
     // Check if the path is empty
     if (!path) {
@@ -177,6 +232,7 @@ function togglePathInputs() {
 
   dailyPathContainerEl.classList.toggle("hidden", mode !== "daily");
   standalonePathContainerEl.classList.toggle("hidden", mode !== "standalone");
+  endpointConfigContainerEl.classList.toggle("hidden", mode !== "endpoint");
 }
 
 function handleStashShortcut(event) {
@@ -243,6 +299,149 @@ function toggleStashListView() {
   }
 }
 
+function toggleEndpointSettingsView() {
+  if (isEditingEndpointSettings) {
+    // Save settings and return to normal mode
+    const content = thoughtInputEl.value;
+    const parsed = parseEndpointSettings(content);
+
+    if (parsed.error) {
+      updateStatus('endpoint_settings_invalid');
+      return;
+    }
+
+    // Save the parsed settings
+    endpointConfig = parsed.config;
+    saveEndpointConfig();
+    updateEndpointConfigDisplay();
+
+    // Restore previous content
+    thoughtInputEl.value = previousContent;
+    thoughtInputEl.readOnly = false;
+    thoughtInputEl.classList.remove('bg-gray-100', 'text-gray-500');
+    isEditingEndpointSettings = false;
+    updateStatus('endpoint_settings_saved');
+  } else {
+    // Enter settings mode
+    previousContent = thoughtInputEl.value;
+    const settingsText = formatEndpointSettings();
+    thoughtInputEl.value = settingsText;
+    thoughtInputEl.readOnly = false; // Keep editable
+    thoughtInputEl.classList.add('bg-gray-100', 'text-gray-500');
+    isEditingEndpointSettings = true;
+    updateStatus('edit');
+  }
+}
+
+function parseEndpointSettings(content) {
+  const lines = content.split('\n');
+  const config = {
+    url: "",
+    authType: "none",
+    bearerToken: "",
+    username: "",
+    password: "",
+    extraHeaders: ""
+  };
+
+  for (const line of lines) {
+    if (line.startsWith('URL:')) {
+      config.url = line.substring(4).trim();
+    } else if (line.startsWith('Auth Type:')) {
+      config.authType = line.substring(10).trim().toLowerCase();
+    } else if (line.startsWith('Bearer Token:')) {
+      config.bearerToken = line.substring(14).trim();
+    } else if (line.startsWith('Username:')) {
+      config.username = line.substring(10).trim();
+    } else if (line.startsWith('Password:')) {
+      config.password = line.substring(10).trim();
+    } else if (line.startsWith('Extra Headers:')) {
+      config.extraHeaders = line.substring(15).trim();
+    }
+  }
+
+  // Validate
+  if (!config.url) {
+    return { error: true, message: "URL is required" };
+  }
+
+  // Validate URL format
+  try {
+    new URL(config.url);
+  } catch (e) {
+    return { error: true, message: "Invalid URL format" };
+  }
+
+  // Validate auth type
+  if (!['none', 'bearer', 'basic'].includes(config.authType)) {
+    return { error: true, message: "Invalid auth type" };
+  }
+
+  if (config.authType === 'bearer' && !config.bearerToken) {
+    return { error: true, message: "Bearer token required" };
+  }
+
+  if (config.authType === 'basic' && (!config.username || !config.password)) {
+    return { error: true, message: "Username and password required" };
+  }
+
+  return { error: false, config };
+}
+
+function formatEndpointSettings() {
+  let text = "--- Endpoint Settings ---\n";
+  text += `URL: ${endpointConfig.url}\n`;
+  text += `Auth Type: ${endpointConfig.authType}\n`;
+  text += `Bearer Token: ${endpointConfig.bearerToken}\n`;
+  text += `Username: ${endpointConfig.username}\n`;
+  text += `Password: ${endpointConfig.password}\n`;
+  text += `Extra Headers: ${endpointConfig.extraHeaders}\n`;
+  text += "---\n";
+  text += "Press Cmd+Shift+O again to save & return";
+  return text;
+}
+
+function updateEndpointConfigDisplay() {
+  if (!endpointConfig.url) {
+    endpointConfigDisplayEl.textContent = "No endpoint configured (Cmd+Shift+O to configure)";
+    endpointConfigDisplayEl.title = "No endpoint configured";
+    endpointConfigDisplayEl.classList.remove("text-gray-700");
+    endpointConfigDisplayEl.classList.add("text-gray-500");
+    return;
+  }
+
+  // Create display text
+  let displayText = truncatePath(endpointConfig.url, 30);
+
+  if (endpointConfig.authType !== 'none') {
+    const authIndicator = endpointConfig.authType === 'bearer' ? 'Bearer •••' : 'Basic auth';
+    displayText += ` | ${authIndicator}`;
+  }
+
+  endpointConfigDisplayEl.textContent = displayText;
+  endpointConfigDisplayEl.title = endpointConfig.url;
+  endpointConfigDisplayEl.classList.remove("text-gray-500");
+  endpointConfigDisplayEl.classList.add("text-gray-700");
+}
+
+function saveEndpointConfig() {
+  window.localStorage.setItem("endpointUrl", endpointConfig.url);
+  window.localStorage.setItem("endpointAuthType", endpointConfig.authType);
+  window.localStorage.setItem("endpointBearerToken", endpointConfig.bearerToken);
+  window.localStorage.setItem("endpointUsername", endpointConfig.username);
+  window.localStorage.setItem("endpointPassword", endpointConfig.password);
+  window.localStorage.setItem("endpointExtraHeaders", endpointConfig.extraHeaders);
+}
+
+function loadEndpointConfig() {
+  endpointConfig.url = window.localStorage.getItem("endpointUrl") || "";
+  endpointConfig.authType = window.localStorage.getItem("endpointAuthType") || "none";
+  endpointConfig.bearerToken = window.localStorage.getItem("endpointBearerToken") || "";
+  endpointConfig.username = window.localStorage.getItem("endpointUsername") || "";
+  endpointConfig.password = window.localStorage.getItem("endpointPassword") || "";
+  endpointConfig.extraHeaders = window.localStorage.getItem("endpointExtraHeaders") || "";
+}
+
 function handleToggleModeShortcut(event) {
   // Check if the user hit Cmd+M (or Ctrl+M on Windows)
   if ((event.metaKey || event.ctrlKey) && event.key === ',') {
@@ -252,6 +451,50 @@ function handleToggleModeShortcut(event) {
     const newMode = currentMode === "daily" ? "standalone" : "daily";
     saveModeEl.value = newMode;
     togglePathInputs(); // Toggle the path input fields based on the new mode
+  }
+}
+
+async function handleEndpointPost(event) {
+  const key = event.key.toLowerCase();
+  if ((event.metaKey || event.ctrlKey) && event.shiftKey && key === 'p') {
+    event.preventDefault();
+
+    // Check if endpoint is configured
+    if (!endpointConfig.url) {
+      updateStatus("no_endpoint");
+      return;
+    }
+
+    const thought = thoughtInputEl.value;
+    if (!thought.trim()) {
+      return;
+    }
+
+    try {
+      const response = await invoke("post_to_endpoint", {
+        content: thought,
+        url: endpointConfig.url,
+        authType: endpointConfig.authType,
+        authToken: endpointConfig.authType === 'bearer' ? endpointConfig.bearerToken : null,
+        username: endpointConfig.authType === 'basic' ? endpointConfig.username : null,
+        password: endpointConfig.authType === 'basic' ? endpointConfig.password : null,
+        extraHeaders: endpointConfig.extraHeaders || null
+      });
+      thoughtInputEl.value = ""; // Clear the textarea after sending
+      window.localStorage.removeItem("draftThought"); // Clear the draft from localStorage
+      updateStatus("success");
+    } catch (error) {
+      console.error(error);
+      updateStatus("error");
+    }
+  }
+}
+
+function handleEndpointSettingsShortcut(event) {
+  const key = event.key.toLowerCase();
+  if ((event.metaKey || event.ctrlKey) && event.shiftKey && key === 'o') {
+    event.preventDefault();
+    toggleEndpointSettingsView();
   }
 }
 
@@ -469,6 +712,10 @@ window.addEventListener("DOMContentLoaded", () => {
   if (savedFontSize) {
     thoughtInputEl.className = thoughtInputEl.className.replace(/text-\w+/, savedFontSize);
   }
+
+  // Load endpoint config from local storage
+  loadEndpointConfig();
+  updateEndpointConfigDisplay();
 
   updateStatus("edit");
 

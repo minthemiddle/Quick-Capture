@@ -23,6 +23,7 @@
                   <select id="save-mode" class="ml-1 form-select appearance-none bg-transparent border border-gray-300 text-gray-700 py-1 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
                       <option value="daily">Append to Daily Note</option>
                       <option value="standalone">Save as Standalone Note</option>
+                      <option value="endpoint">Send to Endpoint</option>
                   </select>
                   <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -85,6 +86,13 @@
                         id="standalone-path-display"
                         title="No folder selected"
                     >No folder selected</span>
+                </div>
+                <div class="ml-4 flex w-full flex-1 items-center hidden" id="endpoint-config-container">
+                    <span
+                        class="ml-2 text-xs text-gray-500 truncate flex-1 min-w-0"
+                        id="endpoint-config-display"
+                        title="No endpoint configured"
+                    >No endpoint configured (Cmd+Shift+O to configure)</span>
                 </div>
             </div>
         </div>

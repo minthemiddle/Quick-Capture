@@ -6,13 +6,14 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 
 - **Quick Capture:** A plain multiline text area for capturing thoughts
 - **Markdown Support:** Input is interpreted as Markdown
-- **Daily and Standalone Notes:** Save thoughts to daily notes or as standalone notes
+- **Multiple Save Modes:** Save to daily notes, standalone notes, or POST to an HTTP endpoint
 - **Path Configuration:** Set the path for daily notes and standalone notes via input fields
+- **Endpoint Configuration:** Configure HTTP POST endpoint with authentication and custom headers
 - **Automatic Draft Saving:** Your input is automatically saved as a draft while you type
 - **Draft Restoration:** Drafts are restored when you reopen the app
 - **Formatting Shortcuts:** Use keyboard shortcuts for common Markdown formatting
 - **Font Size Adjustment:** Increase or decrease the font size of the input area
-- **Quick Mode Switching:** Toggle between daily and standalone modes with `cmd+,` (Mac) / `ctrl+,` (Windows)
+- **Quick Mode Switching:** Toggle between save modes with `cmd+,` (Mac) / `ctrl+,` (Windows)
 
 ## Installation
 
@@ -22,8 +23,10 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 
 ## Usage
 
-1. **Set Save Mode:** Choose between "Append to Daily Note" or "Save as Standalone Note" using the dropdown
-2. **Set Paths:** Enter the path to your daily notes folder or the desired location for standalone notes
+1. **Set Save Mode:** Choose between "Append to Daily Note", "Save as Standalone Note", or "Send to Endpoint" using the dropdown
+2. **Set Paths/Endpoint:**
+   - For file modes: Enter the path to your notes folder
+   - For endpoint mode: Configure endpoint URL and authentication (see Endpoint Configuration below)
 3. **Capture Thoughts:** Type your thoughts into the text area
 4. **Save:** Press `cmd+enter` (Mac) or `ctrl+enter` (Windows) to save your thought
 
@@ -41,6 +44,28 @@ A simple and fast note-taking application to quickly capture thoughts and save t
 - Creates a backlink in the daily note file (if a daily path is provided)
 - Uses the first 10 alphanumeric characters of the thought as the link description
 - Adds an H1 timestamp heading to the standalone note
+
+### Send to Endpoint
+- Sends the thought as JSON to a configured HTTP endpoint via POST request
+- JSON payload format: `{"timestamp": "ISO-8601", "body": "markdown content"}`
+- Supports authentication (Bearer token, Basic auth, or none)
+- Supports custom headers
+- Configure endpoint settings by pressing `cmd+shift+o` (Mac) / `ctrl+shift+o` (Windows)
+- Settings are persisted across app restarts
+
+#### Endpoint Configuration
+Press `cmd+shift+o` to open the endpoint settings editor. Configure:
+
+```
+URL: https://your-api.com/endpoint
+Auth Type: none|bearer|basic
+Bearer Token: your_token_here
+Username: (for basic auth)
+Password: (for basic auth)
+Extra Headers: X-Custom: value, Another-Header: value2
+```
+
+Press `cmd+shift+o` again to save and return to normal input mode.
 
 ## Stash Feature
 
@@ -61,6 +86,7 @@ Quick Capture includes a stash system that lets you temporarily save up to 10 th
 | Action                  | Mac Shortcut     | Windows Shortcut |
 |-------------------------|------------------|------------------|
 | Save thought            | `cmd + enter`    | `ctrl + enter`   |
+| Quick post to endpoint  | `cmd + shift + p`| `ctrl + shift + p`|
 | Toggle mode             | `cmd + ,`        | `ctrl + ,`       |
 | Bold text               | `cmd + b`        | `ctrl + b`       |
 | Italic text             | `cmd + i`        | `ctrl + i`       |
@@ -72,6 +98,7 @@ Quick Capture includes a stash system that lets you temporarily save up to 10 th
 | Apply recent stash      | `cmd + shift + s`| `ctrl + shift + s`|
 | Apply specific stash    | `cmd + shift + [1-9]` | `ctrl + shift + [1-9]` |
 | View stashes            | `cmd + shift + l`     | `ctrl + shift + l`     |
+| Edit endpoint settings  | `cmd + shift + o`     | `ctrl + shift + o`     |
 
 *Note: Formatting shortcuts add formatting to the selected text or at the cursor position. Applying a shortcut multiple times adds multiple formatting marks.*
 

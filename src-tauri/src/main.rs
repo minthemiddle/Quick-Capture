@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use chrono::Local;
+use std::collections::HashMap;
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
@@ -9,7 +10,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![save_thought])
+        .invoke_handler(tauri::generate_handler![save_thought, post_to_endpoint])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -120,4 +121,91 @@ async fn save_thought(thought: String, path: String, mode: String, daily_path: O
     }
 
     Ok("Thought saved successfully".to_string())
+}
+
+#[tauri::command]
+async fn post_to_endpoint(
+    content: String,
+    url: String,
+    auth_type: String,
+    auth_token: Option<String>,
+    username: Option<String>,
+    password: Option<String>,
+    extra_headers: Option<String>,
+) -> Result<String, String> {
+    // Check if the URL is empty
+    if url.is_empty() {
+        return Err("Error: URL cannot be empty".to_string());
+    }
+
+    // Validate URL format
+    let url_parsed = url.parse::<reqwest::Url>()
+        .map_err(|e| format!("Error: Invalid URL: {}", e))?;
+
+    // Build JSON body with timestamp and markdown content
+    let now = Local::now();
+    let timestamp = now.to_rfc3339();
+
+    let mut body = HashMap::new();
+    body.insert("timestamp", timestamp);
+    body.insert("body", content);
+
+    // Build the request with authentication
+    let mut request_builder = reqwest::Client::new()
+        .post(url_parsed);
+
+    // Add authentication
+    match auth_type.as_str() {
+        "bearer" => {
+            if let Some(token) = auth_token {
+                request_builder = request_builder.bearer_auth(&token);
+            } else {
+                return Err("Error: Bearer token required for bearer auth".to_string());
+            }
+        }
+        "basic" => {
+            if let (Some(user), Some(pass)) = (username, password) {
+                request_builder = request_builder.basic_auth(&user, Some(&pass));
+            } else {
+                return Err("Error: Username and password required for basic auth".to_string());
+            }
+        }
+        "none" | _ => {
+            // No authentication
+        }
+    }
+
+    // Parse and add extra headers
+    let mut headers_map = HashMap::new();
+    if let Some(headers_str) = extra_headers {
+        if !headers_str.trim().is_empty() {
+            let headers: Vec<&str> = headers_str.split(',').collect();
+            for header_pair in headers {
+                let parts: Vec<&str> = header_pair.trim().splitn(2, ':').collect();
+                if parts.len() == 2 {
+                    headers_map.insert(parts[0].trim().to_string(), parts[1].trim().to_string());
+                }
+            }
+        }
+    }
+
+    // Build request with headers
+    let mut request = request_builder.json(&body);
+    for (key, value) in headers_map {
+        request = request.header(&key, &value);
+    }
+
+    // Send the request
+    let response = request
+        .send()
+        .await
+        .map_err(|e| format!("Error: Failed to send request: {}", e))?;
+
+    // Check response status
+    if response.status().is_success() {
+        Ok("Thought sent successfully".to_string())
+    } else {
+        let status = response.status();
+        Err(format!("Error: Server returned status {}", status))
+    }
 }
